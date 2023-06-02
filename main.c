@@ -37,41 +37,49 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < sizeof(targetText); ++i) {
 		printf("\b");
 	}
+
 	float wpm;
 	clock_t start, end;
-	start = clock();
+	int clockStarted = 0;
+
     while(1) {
         if (kbhit()) {
+			if (!clockStarted) {
+				start = clock(); 
+				clockStarted = 1;
+			}
 			c[0] = getch();
 			if (c[0] == 8) {
 				backspace(text, &counter, targetText);			
 			}
 			else {
-				strcat(text, c);
-				if (incorrect != -1) {	
-					if (text[incorrect] == targetText[incorrect] || incorrect > counter) {
-						incorrect = -1;
-					} 
-				}
-				if (incorrect == -1 && text[counter] != targetText[counter]) {
-					incorrect = counter;
-				}
-				if (incorrect != -1) {
-					red();
-					if (targetText[counter] == ' ') {
-						printf("_");
-					} else {
-					printf("%c", targetText[counter]);	
+				if (counter < sizeof(targetText)-1) {	
+					strcat(text, c);
+					if (incorrect != -1) {	
+						if (text[incorrect] == targetText[incorrect] || incorrect > counter) {
+							incorrect = -1;
+						} 
 					}
-				} else {
-					green();
-					printf("%s", c);
+					if (incorrect == -1 && text[counter] != targetText[counter]) {
+						incorrect = counter;
+					}
+					if (incorrect != -1) {
+						red();
+						if (targetText[counter] == ' ') {
+							printf("_");
+						} else {
+						printf("%c", targetText[counter]);	
+						}
+					} else {
+						green();
+						printf("%s", c);
+					}
+					counter = counter + 1;
 				}
-				counter = counter + 1;
-
-				if (counter >= sizeof(targetText) - 1) {
+				if (counter >= sizeof(targetText) - 1 && incorrect == -1) {
 					end=clock();
 					wpm	= (sizeof(targetText) / 5) / ((end-start) / 1000.0) * 60;
+					white();
 					printf("\nWPM: %0.0f", wpm);
 				}
 			}
