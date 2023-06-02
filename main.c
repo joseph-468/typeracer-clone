@@ -2,6 +2,7 @@
 #include <conio.h>
 #include <string.h>
 #include <windows.h>
+#include <time.h>
 
 void white() {
 	printf("\033[0;37m");
@@ -36,7 +37,9 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < sizeof(targetText); ++i) {
 		printf("\b");
 	}
-
+	float wpm;
+	clock_t start, end;
+	start = clock();
     while(1) {
         if (kbhit()) {
 			c[0] = getch();
@@ -65,6 +68,12 @@ int main(int argc, char *argv[]) {
 					printf("%s", c);
 				}
 				counter = counter + 1;
+
+				if (counter >= sizeof(targetText) - 1) {
+					end=clock();
+					wpm	= (sizeof(targetText) / 5) / ((end-start) / 1000.0) * 60;
+					printf("\nWPM: %0.0f", wpm);
+				}
 			}
         }
     }	
