@@ -26,20 +26,38 @@ void backspace(char text[], int *counter, char targetText[]) {
 	}
 }
 
+void reset(int *counter, int *incorrect, char text[], char targetText[], char *strings[], int *size, int *clockStarted, int *stringsSize) {
+	white();
+	int random = rand() % *stringsSize / sizeof(char *);
+	int newSize = sizeof(strings[random]);
+	strcpy(targetText, strings[random]);
+	strcpy(text, "");
+	*counter = 0;
+	*incorrect = -1;
+	*size = strlen(targetText);
+	*clockStarted = 0;
+	system("cls");
+		printf("%s", targetText);	
+		for (int i = 0; i < *size; ++i) {
+			printf("\b");
+		}
+}
+
 int main(int argc, char *argv[]) {
-	int incorrect = -1;
-	char text[1000] = "";
 	char c[2] = {' ', '\0'};
-	int counter = 0;
 	char targetText1[] = "The quick brown fox jumps over the lazy dog";
 	char targetText2[] = "Your mother is a fat whore";
 	char targetText3[] = "Your dad is a good boy";
 	char *strings[] = {targetText1, targetText2, targetText3};
-
+	int stringsSize = sizeof(strings);
 	srand(time(NULL));
+
+	int incorrect = -1;
+	char text[1000] = "";
+	int counter = 0;
 	int random = rand() % sizeof(strings) / sizeof(char *);	
 	int newSize = sizeof(strings[random]);
-	char targetText[newSize];
+	char targetText[1000];
 	strcpy(targetText, strings[random]);
 	int size = strlen(targetText);
 
@@ -48,7 +66,7 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < size; ++i) {
 		printf("\b");
 	}
-
+	
 	float wpm;
 	clock_t start, end;
 	int clockStarted = 0;
@@ -62,6 +80,9 @@ int main(int argc, char *argv[]) {
 			c[0] = getch();
 			if (c[0] == 8) {
 				backspace(text, &counter, targetText);			
+			}
+			else if (c[0] == 27) {	
+				reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize);
 			}
 			else {
 				if (counter < size) {	
@@ -88,6 +109,10 @@ int main(int argc, char *argv[]) {
 					counter = counter + 1;
 				}
 				if (counter >= size && incorrect == -1) {
+					if (c[0] == 13) {
+						reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize);
+						continue;
+					}
 					end=clock();
 					wpm	= size / ((end-start) / 1000.0) * 60;
 					white();
