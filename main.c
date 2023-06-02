@@ -26,7 +26,7 @@ void backspace(char text[], int *counter, char targetText[]) {
 	}
 }
 
-void reset(int *counter, int *incorrect, char text[], char targetText[], char *strings[], int *size, int *clockStarted, int *stringsSize) {
+void reset(int *counter, int *incorrect, char text[], char targetText[], char *strings[], int *size, int *clockStarted, int *stringsSize, int *finished) {
 	white();
 	int random = rand() % *stringsSize / sizeof(char *);
 	int newSize = sizeof(strings[random]);
@@ -36,6 +36,7 @@ void reset(int *counter, int *incorrect, char text[], char targetText[], char *s
 	*incorrect = -1;
 	*size = strlen(targetText);
 	*clockStarted = 0;
+	*finished = 0;
 	system("cls");
 		printf("%s", targetText);	
 		for (int i = 0; i < *size; ++i) {
@@ -51,7 +52,8 @@ int main(int argc, char *argv[]) {
 	char *strings[] = {targetText1, targetText2, targetText3};
 	int stringsSize = sizeof(strings);
 	srand(time(NULL));
-
+	
+	int finished = 0;
 	int incorrect = -1;
 	char text[1000] = "";
 	int counter = 0;
@@ -78,11 +80,14 @@ int main(int argc, char *argv[]) {
 				clockStarted = 1;
 			}
 			c[0] = getch();
+			if (c[0] != 13 && finished == 1) {
+				continue;
+			}
 			if (c[0] == 8) {
 				backspace(text, &counter, targetText);			
 			}
 			else if (c[0] == 27) {	
-				reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize);
+				reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize, &finished);
 			}
 			else {
 				if (counter < size) {	
@@ -110,9 +115,10 @@ int main(int argc, char *argv[]) {
 				}
 				if (counter >= size && incorrect == -1) {
 					if (c[0] == 13) {
-						reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize);
+						reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize, &finished);
 						continue;
 					}
+					finished = 1;
 					end=clock();
 					wpm	= size / ((end-start) / 1000.0) * 60;
 					white();
