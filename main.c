@@ -26,11 +26,46 @@ void backspace(char text[], int *counter, char targetText[]) {
 	}
 }
 
+const char* getNewString() {
+	// Open file
+	FILE *fp;
+	fp = fopen("phrases.txt", "r");
+	if (fp == NULL) {
+		return NULL;
+	}
+	char currentString[100];
+	char fileContents[10000];
+	int counter = 0;
+
+	// Store file in fileContents
+	while (fgets(currentString, 100, fp)) {
+		strcat(fileContents, currentString);
+		++counter;
+	}
+
+	int fileLength = counter;
+	const char delimiter[2] = "\n";
+	char *token;
+	int target = rand() % fileLength;
+	counter = 0;
+
+	// Find phrases
+	token = strtok(fileContents, delimiter);
+	while (token) {
+		if (counter == target) {
+			return token;
+		}
+		token = strtok(NULL, delimiter);
+		++counter;
+	}
+	return NULL;
+}
+
 void reset(int *counter, int *incorrect, char text[], char targetText[], char *strings[], int *size, int *clockStarted, int *stringsSize, int *finished) {
 	white();
 	int random = rand() % *stringsSize / sizeof(char *);
 	int newSize = sizeof(strings[random]);
-	strcpy(targetText, strings[random]);
+	strcpy(targetText, getNewString());
 	strcpy(text, "");
 	*counter = 0;
 	*incorrect = -1;
@@ -68,7 +103,7 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < size; ++i) {
 		printf("\b");
 	}
-	
+
 	float wpm;
 	clock_t start, end;
 	int clockStarted = 0;
@@ -127,4 +162,5 @@ int main(int argc, char *argv[]) {
 			}
         }
     }	
+	return 0;
 }
