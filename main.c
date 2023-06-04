@@ -34,7 +34,7 @@ const char* getNewString() {
 		return NULL;
 	}
 	char currentString[1000] = "";
-	char fileContents[10000] = "";
+	char fileContents[100000] = "";
 	int counter = 0;
 
 	// Store file in fileContents
