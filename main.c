@@ -33,8 +33,8 @@ const char* getNewString() {
 	if (fp == NULL) {
 		return NULL;
 	}
-	char currentString[100];
-	char fileContents[10000];
+	char currentString[1000] = "";
+	char fileContents[10000] = "";
 	int counter = 0;
 
 	// Store file in fileContents
@@ -50,7 +50,7 @@ const char* getNewString() {
 	counter = 0;
 
 	// Find phrases
-	token = strtok(fileContents, delimiter);
+	token = strtok(fileContents, delimiter);	
 	while (token) {
 		if (counter == target) {
 			return token;
@@ -61,10 +61,8 @@ const char* getNewString() {
 	return NULL;
 }
 
-void reset(int *counter, int *incorrect, char text[], char targetText[], char *strings[], int *size, int *clockStarted, int *stringsSize, int *finished) {
+void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted) {
 	white();
-	int random = rand() % *stringsSize / sizeof(char *);
-	int newSize = sizeof(strings[random]);
 	strcpy(targetText, getNewString());
 	strcpy(text, "");
 	*counter = 0;
@@ -80,34 +78,21 @@ void reset(int *counter, int *incorrect, char text[], char targetText[], char *s
 }
 
 int main(int argc, char *argv[]) {
-	char c[2] = {' ', '\0'};
-	char targetText1[] = "The quick brown fox jumps over the lazy dog";
-	char targetText2[] = "Your mother is a fat whore";
-	char targetText3[] = "Your dad is a good boy";
-	char *strings[] = {targetText1, targetText2, targetText3};
-	int stringsSize = sizeof(strings);
-	srand(time(NULL));
-	
-	int finished = 0;
-	int incorrect = -1;
-	char text[1000] = "";
-	int counter = 0;
-	int random = rand() % sizeof(strings) / sizeof(char *);	
-	int newSize = sizeof(strings[random]);
+	char text[1000];
 	char targetText[1000];
-	strcpy(targetText, strings[random]);
-	int size = strlen(targetText);
+	int counter;
+	int incorrect;
+	int size;
+	int finished;
 
-	system("cls");
-	printf("%s", targetText);	
-	for (int i = 0; i < size; ++i) {
-		printf("\b");
-	}
-
+	char c[2] = {' ', '\0'};
 	float wpm;
 	clock_t start, end;
 	int clockStarted = 0;
 	
+	// Start this shit	
+	srand(time(NULL)); 
+	reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted);
     while(1) {
         if (kbhit()) {
 			if (!clockStarted) {
@@ -122,7 +107,7 @@ int main(int argc, char *argv[]) {
 				backspace(text, &counter, targetText);			
 			}
 			else if (c[0] == 27) {	
-				reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize, &finished);
+				reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted);
 			}
 			else {
 				if (counter < size) {	
@@ -150,7 +135,7 @@ int main(int argc, char *argv[]) {
 				}
 				if (counter >= size && incorrect == -1) {
 					if (c[0] == 13) {
-						reset(&counter, &incorrect, text, targetText, strings, &size, &clockStarted, &stringsSize, &finished);
+						reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted);
 						continue;
 					}
 					finished = 1;
