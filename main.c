@@ -63,7 +63,11 @@ const char* getNewString() {
 
 void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted) {
 	white();
-	strcpy(targetText, getNewString());
+	char previousText[1000];
+	strcpy(previousText, targetText);	
+	while (strcmp(previousText, targetText) == 0) {
+		strcpy(targetText, getNewString());
+	}
 	strcpy(text, "");
 	*counter = 0;
 	*incorrect = -1;
@@ -71,10 +75,10 @@ void reset(char text[], char targetText[], int *counter, int *incorrect, int *si
 	*clockStarted = 0;
 	*finished = 0;
 	system("cls");
-		printf("%s", targetText);	
-		for (int i = 0; i < *size; ++i) {
-			printf("\b");
-		}
+	printf("%s", targetText);	
+	for (int i = 0; i < *size; ++i) {
+		printf("\b");
+	}
 }
 
 int main(int argc, char *argv[]) {
