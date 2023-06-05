@@ -18,6 +18,7 @@ void green() {
 }
 
 void backspace(char text[], int *counter, char targetText[]) {
+	// Cute little backspace function \(-ㅂ-)/
 	if (*counter > 0) {
 		text[*counter-1] = '\0';
 		*counter = *counter - 1;
@@ -31,7 +32,7 @@ const char* getNewString(char *fileContents, char *tempContents, int fileLength)
 	int target = rand() % fileLength;
 	int counter = 0;
 	strcpy(tempContents, fileContents);
-	// Find phrases
+	// Loop through file contents to find phrase with same index as random (very slow)
 	char *token = strtok(tempContents, delimiter);	
 	while (token) {
 		if (counter == target) {
@@ -44,11 +45,13 @@ const char* getNewString(char *fileContents, char *tempContents, int fileLength)
 
 void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted, char *fileContents, char *tempContents, int fileLength) {
 	white();
+	// Find new phrase that isn't the same as old
 	char previousText[1000];
 	strcpy(previousText, targetText);	
 	while (strcmp(previousText, targetText) == 0) {
 		strcpy(targetText, getNewString(fileContents, tempContents, fileLength));
 	}
+	// Reset most variables
 	strcpy(text, "");
 	*counter = 0;
 	*incorrect = -1;
@@ -60,41 +63,42 @@ void reset(char text[], char targetText[], int *counter, int *incorrect, int *si
 	for (int i = 0; i < *size; ++i) {
 		printf("\b");
 	}
-	printf ( "\033[1;H");
+	printf("\033[1;H");
 }
 
 int main(int argc, char *argv[]) {
-	SetConsoleOutputCP( 65001 );
+	SetConsoleOutputCP( 65001 ); // Allows console to properly display characters
 	// Open file
-	FILE *fp;
-	fp = fopen("phrases.txt", "r");
+	FILE *fp = fopen("phrases.txt", "r");
 	if (fp == NULL) {
 		return -1;
 	}
+	fseek(fp, 0, SEEK_END);
+	long int fileSize = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
 	char currentString[1000] = "";	
-	char *fileContents = (char *) malloc(1580000);
-	char *tempContents = (char *) malloc(1580000);
+	char *fileContents = (char *) malloc(fileSize);
+	char *tempContents = (char *) malloc(fileSize);
 	int fileCounter = 0;
 	while (fgets(currentString, 1000, fp)) {
 		strcat(fileContents, currentString);
 		++fileCounter;
 	}
 	int fileLength = fileCounter;
-	fread(file_buffer, 1024*1024*4, 1, fp);
-	printf("strlen %zu\n", strlen(file_buffer));
+
+	// Initalize variables
 	char text[1000];
 	char targetText[1000];
 	int counter;
 	int incorrect;
 	int size;
 	int finished;
-
 	char c[2] = {' ', '\0'};
 	float wpm;
 	clock_t start, end;
 	int clockStarted = 0;
 	
-	// Start this shit	
+	// Start game loop
 	srand(time(NULL)); 
 	reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, tempContents, fileLength);
     while(1) {
@@ -142,6 +146,7 @@ int main(int argc, char *argv[]) {
 						reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, tempContents, fileLength);
 						continue;
 					}
+					// Calculate WPM
 					finished = 1;
 					end=clock();
 					wpm	= size / ((end-start) / 1000.0) * 60;
