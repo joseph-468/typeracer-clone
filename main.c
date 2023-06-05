@@ -26,11 +26,10 @@ void backspace(char text[], int *counter, char targetText[]) {
 	}
 }
 
-const char* getNewString(char *fileContents, int fileLength) {
+const char* getNewString(char *fileContents, char *tempContents, int fileLength) {
 	const char delimiter[2] = "\n";
 	int target = rand() % fileLength;
 	int counter = 0;
-	char *tempContents = malloc(1580000);
 	strcpy(tempContents, fileContents);
 	// Find phrases
 	char *token = strtok(tempContents, delimiter);	
@@ -40,16 +39,15 @@ const char* getNewString(char *fileContents, int fileLength) {
 		}
 		token = strtok(NULL, delimiter);
 		++counter;
-	}
-	return NULL;
+	}	
 }
 
-void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted, char *fileContents, int fileLength) {
+void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted, char *fileContents, char *tempContents, int fileLength) {
 	white();
 	char previousText[1000];
 	strcpy(previousText, targetText);	
 	while (strcmp(previousText, targetText) == 0) {
-		strcpy(targetText, getNewString(fileContents, fileLength));
+		strcpy(targetText, getNewString(fileContents, tempContents, fileLength));
 	}
 	strcpy(text, "");
 	*counter = 0;
@@ -74,14 +72,16 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	char currentString[1000] = "";	
-	char *fileContents = malloc(1580000);
+	char *fileContents = (char *) malloc(1580000);
+	char *tempContents = (char *) malloc(1580000);
 	int fileCounter = 0;
 	while (fgets(currentString, 1000, fp)) {
 		strcat(fileContents, currentString);
 		++fileCounter;
 	}
 	int fileLength = fileCounter;
-
+	fread(file_buffer, 1024*1024*4, 1, fp);
+	printf("strlen %zu\n", strlen(file_buffer));
 	char text[1000];
 	char targetText[1000];
 	int counter;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 	
 	// Start this shit	
 	srand(time(NULL)); 
-	reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, fileLength);
+	reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, tempContents, fileLength);
     while(1) {
         if (kbhit()) {
 			if (!clockStarted) {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 				backspace(text, &counter, targetText);			
 			}
 			else if (c[0] == 27) {	
-				reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, fileLength);
+				reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, tempContents, fileLength);
 			}
 			else {
 				if (counter < size) {	
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 				}
 				if (counter >= size && incorrect == -1) {
 					if (c[0] == 13) {
-						reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, fileLength);
+						reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, tempContents, fileLength);
 						continue;
 					}
 					finished = 1;
