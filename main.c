@@ -26,31 +26,14 @@ void backspace(char text[], int *counter, char targetText[]) {
 	}
 }
 
-const char* getNewString() {
-	// Open file
-	FILE *fp;
-	fp = fopen("phrases.txt", "r");
-	if (fp == NULL) {
-		return NULL;
-	}
-	char currentString[1000] = "";
-	char fileContents[100000] = "";
-	int counter = 0;
-
-	// Store file in fileContents
-	while (fgets(currentString, 100, fp)) {
-		strcat(fileContents, currentString);
-		++counter;
-	}
-
-	int fileLength = counter;
+const char* getNewString(char *fileContents, int fileLength) {
 	const char delimiter[2] = "\n";
-	char *token;
 	int target = rand() % fileLength;
-	counter = 0;
-
+	int counter = 0;
+	char *tempContents = malloc(1580000);
+	strcpy(tempContents, fileContents);
 	// Find phrases
-	token = strtok(fileContents, delimiter);	
+	char *token = strtok(tempContents, delimiter);	
 	while (token) {
 		if (counter == target) {
 			return token;
@@ -61,12 +44,12 @@ const char* getNewString() {
 	return NULL;
 }
 
-void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted) {
+void reset(char text[], char targetText[], int *counter, int *incorrect, int *size, int *finished, int *clockStarted, char *fileContents, int fileLength) {
 	white();
 	char previousText[1000];
 	strcpy(previousText, targetText);	
 	while (strcmp(previousText, targetText) == 0) {
-		strcpy(targetText, getNewString());
+		strcpy(targetText, getNewString(fileContents, fileLength));
 	}
 	strcpy(text, "");
 	*counter = 0;
@@ -79,9 +62,26 @@ void reset(char text[], char targetText[], int *counter, int *incorrect, int *si
 	for (int i = 0; i < *size; ++i) {
 		printf("\b");
 	}
+	printf ( "\033[1;H");
 }
 
 int main(int argc, char *argv[]) {
+	SetConsoleOutputCP( 65001 );
+	// Open file
+	FILE *fp;
+	fp = fopen("phrases.txt", "r");
+	if (fp == NULL) {
+		return -1;
+	}
+	char currentString[1000] = "";	
+	char *fileContents = malloc(1580000);
+	int fileCounter = 0;
+	while (fgets(currentString, 1000, fp)) {
+		strcat(fileContents, currentString);
+		++fileCounter;
+	}
+	int fileLength = fileCounter;
+
 	char text[1000];
 	char targetText[1000];
 	int counter;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 	
 	// Start this shit	
 	srand(time(NULL)); 
-	reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted);
+	reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, fileLength);
     while(1) {
         if (kbhit()) {
 			if (!clockStarted) {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 				backspace(text, &counter, targetText);			
 			}
 			else if (c[0] == 27) {	
-				reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted);
+				reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, fileLength);
 			}
 			else {
 				if (counter < size) {	
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 				}
 				if (counter >= size && incorrect == -1) {
 					if (c[0] == 13) {
-						reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted);
+						reset(text, targetText, &counter, &incorrect, &size, &finished, &clockStarted, fileContents, fileLength);
 						continue;
 					}
 					finished = 1;
